@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT SECURE — Sistem Ujian Online</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #161c2e;
+    --border: #1e2740;
+    --accent: #3b6aff;
+    --accent2: #00c896;
+    --danger: #ff4444;
+    --warn: #ffaa00;
+    --text: #e8eaf2;
+    --muted: #6b7494;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 60% 40%, #0f1e4a 0%, #0a0d14 70%);
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: 0 40px 80px rgba(0,0,0,.6);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-logo .shield {
+    font-size: 52px;
+    display: block;
+    filter: drop-shadow(0 0 20px #3b6aff88);
+  }
+  .login-logo h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.3px;
+    margin-top: 12px;
+  }
+  .login-logo p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .form-group input {
+    width: 100%; padding: 13px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-group input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--accent);
+    border: none; border-radius: 10px;
+    color: #fff; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity .2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { opacity: .85; }
+
+  .login-error {
+    background: rgba(255,68,68,.12);
+    border: 1px solid rgba(255,68,68,.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #ff7777;
+    margin-top: 14px;
+    display: none;
+  }
+
+  /* ── PERMISSION ── */
+  #permScreen {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+  }
+  .perm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 480px;
+    max-width: 95vw;
+    text-align: center;
+  }
+  .perm-card h2 { font-size: 20px; margin-bottom: 12px; }
+  .perm-card p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+  .perm-list { text-align: left; margin-bottom: 28px; }
+  .perm-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+  .perm-icon { font-size: 20px; }
+  .perm-error { background: rgba(255,68,68,.1); border: 1px solid rgba(255,68,68,.3); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display:none; }
+  .perm-error-title { color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .perm-error-body { color: #ffaaaa; font-size: 13px; line-height: 1.6; }
+  .perm-howto { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; text-align:left; display:none; }
+  .perm-howto-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; color: var(--warn); }
+  .perm-howto ol { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 2; }
+  .btn-fallback { width:100%; padding:12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-size:13px; cursor:pointer; margin-top:8px; display:none; }
+  .btn-fallback:hover { border-color: var(--warn); color: var(--warn); }
+  .cam-test-wrap { margin-bottom: 16px; border-radius: 10px; overflow: hidden; border: 2px solid var(--accent2); display:none; position:relative; }
+  .cam-test-wrap video { width:100%; display:block; transform:scaleX(-1); }
+  .cam-test-label { background: rgba(0,200,150,.15); color: var(--accent2); font-size: 12px; padding: 6px 12px; text-align:center; }
+
+  /* ── EXAM ── */
+  #examScreen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  .exam-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-left .logo-sm { font-size: 18px; font-weight: 700; }
+  .student-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+  }
+
+  .timer-block {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px; font-weight: 600;
+  }
+  .timer-block.warn { color: var(--warn); }
+  .timer-block.danger { color: var(--danger); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .cam-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--accent2);
+  }
+  .cam-dot { width: 8px; height: 8px; background: var(--accent2); border-radius: 50%; animation: pulse 2s infinite; }
+
+  .violation-badge {
+    background: rgba(255,68,68,.15);
+    border: 1px solid rgba(255,68,68,.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--danger);
+    display: none;
+  }
+
+  /* main exam layout */
+  .exam-body {
+    display: flex;
+    flex: 1;
+    gap: 0;
+  }
+
+  /* sidebar */
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .sidebar h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 4px; }
+  .q-btn {
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .q-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .q-btn.answered { background: rgba(0,200,150,.1); border-color: var(--accent2); color: var(--accent2); }
+  .q-btn.current { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .q-btn.flagged { background: rgba(255,170,0,.1); border-color: var(--warn); color: var(--warn); }
+
+  .progress-wrap { margin-top: 4px; }
+  .progress-bar-bg { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--accent2); border-radius: 4px; transition: width .3s; }
+  .progress-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .cam-preview {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    position: relative;
+  }
+  .cam-preview video { width: 100%; display: block; transform: scaleX(-1); }
+  .cam-label { position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,.7); font-size: 10px; padding: 2px 8px; border-radius: 10px; color: var(--accent2); }
+
+  /* question area */
+  .question-area {
+    flex: 1;
+    padding: 32px;
+    max-width: 760px;
+  }
+  .q-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .q-number { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .q-subject-tag {
+    background: rgba(59,106,255,.12);
+    border: 1px solid rgba(59,106,255,.25);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .q-flag-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .q-flag-btn:hover, .q-flag-btn.active { border-color: var(--warn); color: var(--warn); background: rgba(255,170,0,.08); }
+
+  .q-text {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .option:hover { border-color: var(--accent); background: rgba(59,106,255,.06); }
+  .option.selected { border-color: var(--accent); background: rgba(59,106,255,.1); }
+  .opt-letter {
+    width: 30px; height: 30px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+    transition: all .15s;
+  }
+  .option.selected .opt-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .opt-text { font-size: 14px; line-height: 1.5; padding-top: 4px; }
+
+  .nav-btns { display: flex; gap: 12px; margin-top: 28px; }
+  .btn-nav {
+    padding: 11px 24px;
+    border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    transition: all .15s;
+  }
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav.next { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-nav.next:hover { opacity: .85; }
+  .btn-submit { background: var(--accent2); border-color: var(--accent2); color: #000; font-weight: 700; margin-left: auto; }
+  .btn-submit:hover { opacity: .85; }
+
+  /* ── ALERTS ── */
+  .alert-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+  .alert-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    width: 440px;
+    max-width: 95vw;
+    text-align: center;
+  }
+  .alert-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+  .alert-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .alert-body { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+  .alert-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn-alert { padding: 11px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+  .btn-accent { background: var(--accent); color: #fff; }
+
+  /* ── VIOLATION TOAST ── */
+  #violationToast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: rgba(255,68,68,.12);
+    border: 1px solid rgba(255,68,68,.4);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: none;
+    z-index: 8000;
+    max-width: 340px;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+  .toast-title { font-size: 14px; font-weight: 700; color: var(--danger); }
+  .toast-body { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ── RESULT ── */
+  #resultScreen {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+  }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 520px;
+    max-width: 95vw;
+    text-align: center;
+  }
+  .score-ring {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent2) var(--pct), var(--surface2) 0);
+    margin: 0 auto 24px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .score-ring::before { content:''; position:absolute;inset:16px;background:var(--surface);border-radius:50%; }
+  .score-num { font-size: 32px; font-weight: 700; position: relative; z-index: 1; }
+  .result-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 24px 0; }
+  .meta-item { background: var(--surface2); border-radius: 10px; padding: 14px; }
+  .meta-val { font-size: 22px; font-weight: 700; }
+  .meta-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── ADMIN PANEL ── */
+  #adminScreen {
+    display: none;
+    min-height: 100vh;
+  }
+  .admin-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .admin-title { font-size: 16px; font-weight: 700; }
+  .admin-body { padding: 32px; max-width: 1100px; margin: 0 auto; }
+  .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; margin-top: 24px; }
+  .student-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .student-card .nis { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
+  .student-card .name { font-size: 15px; font-weight: 600; margin: 4px 0; }
+  .student-card .status { font-size: 12px; color: var(--muted); }
+  .violation-tag { display: inline-block; background: rgba(255,68,68,.12); border: 1px solid rgba(255,68,68,.3); border-radius: 20px; padding: 2px 10px; font-size: 11px; color: var(--danger); margin-top: 8px; }
+  .ok-tag { display: inline-block; background: rgba(0,200,150,.1); border: 1px solid rgba(0,200,150,.25); border-radius: 20px; padding: 2px 10px; font-size: 11px; color: var(--accent2); margin-top: 8px; }
+  .photos-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .violation-photo { width: 70px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+
+  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .section-sub { font-size: 13px; color: var(--muted); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .stat-num { font-size: 32px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* modal photo */
+  #photoModal {
+    display: none; position:fixed; inset:0;
+    background: rgba(0,0,0,.9); z-index:99999;
+    align-items:center; justify-content:center;
+  }
+  #photoModal img { max-width:90vw; max-height:90vh; border-radius:10px; }
+
+  /* Responsive */
+  @media(max-width:600px){
+    .exam-body{flex-direction:column;}
+    .sidebar{width:100%;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border);}
+    .question-area{padding:20px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ LOGIN ════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="shield">🛡️</span>
+      <h1>CBT SECURE</h1>
+      <p>Sistem Ujian Berbasis Komputer</p>
+    </div>
+    <div class="form-group">
+      <label>NIS / Username</label>
+      <input type="text" id="inputNIS" placeholder="Masukkan NIS Anda" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="inputPW" placeholder="Masukkan password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Masuk ke Ujian</button>
+    <div class="login-error" id="loginError"></div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:center;">
+      <button style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;" onclick="showAdmin()">Login sebagai Guru/Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ PERMISSION ════════════════ -->
+<div id="permScreen" style="display:none;flex-direction:column;">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;">
+    <div class="perm-card">
+      <span style="font-size:48px;display:block;margin-bottom:16px;">📷</span>
+      <h2>Izin Kamera Diperlukan</h2>
+      <p>Sistem ujian memerlukan akses kamera untuk memantau peserta. Foto akan diambil otomatis jika terdeteksi pelanggaran.</p>
+
+      <!-- Preview kamera setelah berhasil -->
+      <div class="cam-test-wrap" id="camTestWrap">
+        <video id="camTestVideo" autoplay muted playsinline></video>
+        <div class="cam-test-label">✅ Kamera terdeteksi — Preview langsung</div>
+      </div>
+
+      <!-- Error box -->
+      <div class="perm-error" id="permError">
+        <div class="perm-error-title" id="permErrorTitle">❌ Kamera tidak dapat diakses</div>
+        <div class="perm-error-body" id="permErrorBody"></div>
+      </div>
+
+      <!-- How-to box -->
+      <div class="perm-howto" id="permHowto">
+        <div class="perm-howto-title">⚙️ Cara Mengaktifkan Izin Kamera:</div>
+        <ol id="permHowtoList"></ol>
+      </div>
+
+      <div class="perm-list">
+        <div class="perm-item"><span class="perm-icon">📷</span> Akses kamera untuk monitoring</div>
+        <div class="perm-item"><span class="perm-icon">🖥️</span> Mode layar penuh wajib aktif</div>
+        <div class="perm-item"><span class="perm-icon">🚫</span> Tab / jendela lain akan diblokir</div>
+        <div class="perm-item"><span class="perm-icon">📸</span> Foto dikirim ke guru jika ada pelanggaran</div>
+      </div>
+
+      <button class="btn-primary" id="btnStartExam" onclick="requestPermissions()">📷 Aktifkan Kamera & Mulai Ujian</button>
+      <button class="btn-fallback" id="btnFallback" onclick="startWithoutCamera()">⚠️ Lanjut tanpa kamera (tidak direkomendasikan)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ EXAM ════════════════ -->
+<div id="examScreen" style="display:none;flex-direction:column;">
+  <div class="exam-header">
+    <div class="header-left">
+      <span class="logo-sm">🛡️ CBT SECURE</span>
+      <span class="student-badge" id="headerNIS"></span>
+    </div>
+    <div class="timer-block" id="timerDisplay">⏱ 60:00</div>
+    <div class="header-right">
+      <div class="cam-indicator"><div class="cam-dot"></div> Kamera Aktif</div>
+      <div class="violation-badge" id="violationBadge">⚠ Pelanggaran: <span id="violCount">0</span></div>
+    </div>
+  </div>
+
+  <div class="exam-body">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div>
+        <h3>Navigasi Soal</h3>
+        <div class="q-grid" id="qGrid"></div>
+      </div>
+      <div>
+        <h3>Progress</h3>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+          <div class="progress-label" id="progressLabel">0 / 20 terjawab</div>
+        </div>
+      </div>
+      <div>
+        <h3>Pemantauan</h3>
+        <div class="cam-preview">
+          <video id="camPreview" autoplay muted playsinline></video>
+          <div class="cam-label">🔴 LIVE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-area" id="questionArea"></div>
+  </div>
+</div>
+
+<!-- ════════════════ RESULT ════════════════ -->
+<div id="resultScreen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+  <div class="result-card">
+    <h2 style="margin-bottom:24px;">📋 Hasil Ujian</h2>
+    <div class="score-ring" id="scoreRing">
+      <div class="score-num" id="scoreNum">0</div>
+    </div>
+    <div id="resultName" style="font-weight:600;margin-bottom:4px;"></div>
+    <div id="resultNIS" style="font-size:13px;color:var(--muted);margin-bottom:20px;"></div>
+    <div class="result-meta">
+      <div class="meta-item"><div class="meta-val" id="rCorrect">0</div><div class="meta-label">Benar</div></div>
+      <div class="meta-item"><div class="meta-val" id="rWrong">0</div><div class="meta-label">Salah</div></div>
+      <div class="meta-item"><div class="meta-val" id="rSkip">0</div><div class="meta-label">Dilewati</div></div>
+    </div>
+    <div id="rViolInfo" style="font-size:13px;color:var(--muted);margin-bottom:24px;"></div>
+    <button class="btn-primary" onclick="logoutToLogin()">Selesai</button>
+  </div>
+</div>
+
+<!-- ════════════════ ADMIN ════════════════ -->
+<div id="adminScreen" style="display:none;">
+  <div class="admin-header">
+    <span class="admin-title">🛡️ CBT SECURE — Panel Guru / Admin</span>
+    <button class="btn-nav" onclick="logoutToLogin()" style="font-size:13px;padding:8px 16px;">Keluar</button>
+  </div>
+  <div class="admin-body">
+    <div class="section-title">Monitoring Ujian Real-Time</div>
+    <div class="section-sub">Status dan pelanggaran seluruh peserta ujian</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Peserta</div></div>
+      <div class="stat-card"><div class="stat-num" id="statDone">0</div><div class="stat-label">Selesai</div></div>
+      <div class="stat-card"><div class="stat-num" id="statViol">0</div><div class="stat-label">Pelanggaran</div></div>
+      <div class="stat-card"><div class="stat-num" id="statAvg">—</div><div class="stat-label">Rata-rata Nilai</div></div>
+    </div>
+    <div class="admin-grid" id="adminGrid"></div>
+  </div>
+</div>
+
+<!-- ════════════════ OVERLAYS ════════════════ -->
+<!-- Focus Lost Warning -->
+<div class="alert-overlay" id="focusAlert">
+  <div class="alert-box">
+    <span class="alert-icon">⚠️</span>
+    <div class="alert-title">Anda Meninggalkan Halaman Ujian!</div>
+    <div class="alert-body">Tindakan ini tercatat sebagai pelanggaran. Foto telah diambil dan dikirim ke guru. Harap kembali ke halaman ujian dan jangan berpindah tab atau jendela.</div>
+    <div class="alert-actions">
+      <button class="btn-alert btn-danger" onclick="dismissAlert('focusAlert')">Saya Mengerti & Kembali</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phone Detected -->
+<div class="alert-overlay" id="phoneAlert">
+  <div class="alert-box">
+    <span class="alert-icon">📵</span>
+    <div class="alert-title">Terdeteksi: Penggunaan HP!</div>
+    <div class="alert-body">Kamera mendeteksi kemungkinan penggunaan perangkat HP. Foto telah diambil dan <strong style="color:#ff7777">dikirimkan ke guru/admin</strong>. Pelanggaran ini dicatat dalam laporan ujian Anda.</div>
+    <div class="alert-actions">
+      <button class="btn-alert btn-danger" onclick="dismissAlert('phoneAlert')">Saya Mengerti</button>
+    </div>
+  </div>
+</div>
+
+<!-- Submit Confirm -->
+<div class="alert-overlay" id="submitAlert">
+  <div class="alert-box">
+    <span class="alert-icon">📤</span>
+    <div class="alert-title">Kumpulkan Jawaban?</div>
+    <div class="alert-body" id="submitAlertBody">Anda akan mengumpulkan jawaban. Pastikan semua soal telah dijawab sebelum mengumpulkan.</div>
+    <div class="alert-actions">
+      <button class="btn-alert btn-secondary" onclick="dismissAlert('submitAlert')">Batal</button>
+      <button class="btn-alert btn-accent" onclick="finalSubmit()">Kumpulkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Time Up -->
+<div class="alert-overlay" id="timeupAlert">
+  <div class="alert-box">
+    <span class="alert-icon">⏰</span>
+    <div class="alert-title">Waktu Habis!</div>
+    <div class="alert-body">Waktu ujian Anda telah habis. Jawaban akan dikumpulkan secara otomatis.</div>
+    <div class="alert-actions">
+      <button class="btn-alert btn-accent" onclick="finalSubmit()">Lihat Hasil</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login -->
+<div class="alert-overlay" id="adminLoginAlert">
+  <div class="alert-box">
+    <span class="alert-icon">🔐</span>
+    <div class="alert-title">Login Admin / Guru</div>
+    <div style="margin-bottom:20px;">
+      <div class="form-group" style="text-align:left;"><label>Username</label><input type="text" id="adminUser" placeholder="admin" autocomplete="off"></div>
+      <div class="form-group" style="text-align:left;"><label>Password</label><input type="password" id="adminPass" placeholder="password"></div>
+      <div class="login-error" id="adminError"></div>
+    </div>
+    <div class="alert-actions">
+      <button class="btn-alert btn-secondary" onclick="dismissAlert('adminLoginAlert')">Batal</button>
+      <button class="btn-alert btn-accent" onclick="doAdminLogin()">Masuk</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo Viewer Modal -->
+<div id="photoModal" onclick="this.style.display='none'">
+  <img id="photoModalImg" src="">
+</div>
+
+<!-- Violation Toast -->
+<div id="violationToast">
+  <div class="toast-title" id="toastTitle">⚠ Pelanggaran Terdeteksi</div>
+  <div class="toast-body" id="toastBody"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════════════════
+
+// Database siswa: { nis: { name, password, class } }
+const STUDENTS = {
+  "12345": { name: "Ahmad Rizky",     password: "12345",  class: "XII-IPA-1" },
+  "12346": { name: "Siti Nurhaliza",  password: "12346",  class: "XII-IPA-1" },
+  "12347": { name: "Budi Santoso",    password: "12347",  class: "XII-IPA-2" },
+  "12348": { name: "Dewi Rahayu",     password: "12348",  class: "XII-IPA-2" },
+  "12349": { name: "Fajar Maulana",   password: "12349",  class: "XII-IPS-1" },
+  "12350": { name: "Rina Kusuma",     password: "12350",  class: "XII-IPS-1" },
+  "12351": { name: "Dani Pratama",    password: "12351",  class: "XII-IPS-2" },
+  "12352": { name: "Maya Anggraini",  password: "12352",  class: "XII-IPS-2" },
+};
+
+const ADMIN_CREDS = { username: "admin", password: "admin123" };
+
+// Bank soal (20 soal)
+const QUESTIONS = [
+  { q:"Siapakah proklamator kemerdekaan Indonesia?", opts:["Soekarno & Hatta","Soeharto & Habibie","Megawati & Wahid","Jokowi & Prabowo"], ans:0, subject:"PKN" },
+  { q:"Apa ibu kota negara Indonesia?", opts:["Surabaya","Bandung","Jakarta","Yogyakarta"], ans:2, subject:"IPS" },
+  { q:"Berapa hasil dari 7 × 8?", opts:["54","56","58","62"], ans:1, subject:"Matematika" },
+  { q:"Apa rumus luas lingkaran dengan jari-jari r?", opts:["2πr","πr²","πd","4πr²"], ans:1, subject:"Matematika" },
+  { q:"Unsur kimia dengan simbol 'O' adalah?", opts:["Osmium","Oksigen","Oganesson","Otorium"], ans:1, subject:"IPA" },
+  { q:"Planet terdekat dengan matahari adalah?", opts:["Venus","Mars","Merkurius","Bumi"], ans:2, subject:"IPA" },
+  { q:"Siapa pengarang novel 'Laskar Pelangi'?", opts:["Pramoedya Ananta Toer","Andrea Hirata","Habiburrahman","Dee Lestari"], ans:1, subject:"B.Indonesia" },
+  { q:"Apa yang dimaksud dengan 'fotosintesis'?", opts:["Proses pembuatan makanan oleh tumbuhan","Proses pernapasan hewan","Proses pencernaan","Proses reproduksi"], ans:0, subject:"IPA" },
+  { q:"Berapakah nilai π (pi) dalam 2 desimal?", opts:["3.12","3.14","3.16","3.18"], ans:1, subject:"Matematika" },
+  { q:"Bahasa resmi negara Indonesia adalah?", opts:["Jawa","Sunda","Indonesia","Melayu"], ans:2, subject:"PKN" },
+  { q:"Berapakah 15² ?", opts:["200","215","225","235"], ans:2, subject:"Matematika" },
+  { q:"Apa nama danau terbesar di Indonesia?", opts:["Danau Toba","Danau Ranau","Danau Singkarak","Danau Matano"], ans:0, subject:"IPS" },
+  { q:"Siapakah presiden pertama Republik Indonesia?", opts:["Soeharto","Habibie","Soekarno","Wahid"], ans:2, subject:"PKN" },
+  { q:"Air mendidih pada suhu berapa dalam Celsius?", opts:["90°C","95°C","100°C","105°C"], ans:2, subject:"IPA" },
+  { q:"Apa kepanjangan dari 'PBB'?", opts:["Persatuan Bangsa-Bangsa","Perusahaan Besar Bersama","Perkumpulan Bangsa-Bangsa","Pertemuan Bangsa-Bangsa"], ans:0, subject:"IPS" },
+  { q:"Berapa sisi pada bangun segi enam?", opts:["4","5","6","7"], ans:2, subject:"Matematika" },
+  { q:"Apa fungsi utama jantung dalam tubuh manusia?", opts:["Menyaring darah","Memompa darah","Mencerna makanan","Mengatur suhu tubuh"], ans:1, subject:"IPA" },
+  { q:"Tokoh yang menyusun teks proklamasi kemerdekaan RI adalah?", opts:["Ahmad Soebardjo, Soekarno, Hatta","Soeharto, Nasution, Yani","Wahid, Megawati, Habibie","Jokowi, Anies, Prabowo"], ans:0, subject:"PKN" },
+  { q:"Kata 'mengagumi' termasuk dalam kelas kata?", opts:["Nomina","Verba","Adjektiva","Adverbia"], ans:1, subject:"B.Indonesia" },
+  { q:"Apa satuan SI untuk tekanan?", opts:["Newton","Joule","Pascal","Watt"], ans:2, subject:"IPA" },
+];
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+let currentStudent = null;
+let currentQ = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let flagged = new Array(QUESTIONS.length).fill(false);
+let violations = 0;
+let violationPhotos = [];
+let timerSecs = 60 * 60; // 60 min
+let timerInterval = null;
+let mediaStream = null;
+let phoneCheckInterval = null;
+let examFinished = false;
+
+// Admin log (shared in memory)
+let adminLog = {};   // keyed by NIS
+
+// ════════════════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════════════════
+function doLogin() {
+  const nis = document.getElementById('inputNIS').value.trim();
+  const pw  = document.getElementById('inputPW').value;
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+
+  if (!STUDENTS[nis]) { showLoginError("NIS tidak ditemukan."); return; }
+  if (STUDENTS[nis].password !== pw) { showLoginError("Password salah."); return; }
+
+  currentStudent = { nis, ...STUDENTS[nis] };
+  answers = new Array(QUESTIONS.length).fill(null);
+  flagged  = new Array(QUESTIONS.length).fill(false);
+  violations = 0;
+  violationPhotos = [];
+  examFinished = false;
+
+  // init admin log entry
+  if (!adminLog[nis]) adminLog[nis] = { name: currentStudent.name, class: currentStudent.class, violations: 0, photos: [], score: null, done: false };
+
+  show('permScreen');
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showAdmin() { showOverlay('adminLoginAlert'); }
+
+function doAdminLogin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  const err = document.getElementById('adminError');
+  if (u === ADMIN_CREDS.username && p === ADMIN_CREDS.password) {
+    dismissAlert('adminLoginAlert');
+    renderAdminPanel();
+    show('adminScreen');
+  } else {
+    err.textContent = "Username atau password salah.";
+    err.style.display = 'block';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  PERMISSIONS & START
+// ════════════════════════════════════════════════════════════
+async function requestPermissions() {
+  const btn       = document.getElementById('btnStartExam');
+  const errBox    = document.getElementById('permError');
+  const errTitle  = document.getElementById('permErrorTitle');
+  const errBody   = document.getElementById('permErrorBody');
+  const howtoBox  = document.getElementById('permHowto');
+  const howtoList = document.getElementById('permHowtoList');
+  const fallbackBtn = document.getElementById('btnFallback');
+  const camWrap   = document.getElementById('camTestWrap');
+  const camTest   = document.getElementById('camTestVideo');
+
+  errBox.style.display    = 'none';
+  howtoBox.style.display  = 'none';
+  btn.textContent = '⏳ Meminta izin kamera...';
+  btn.disabled = true;
+
+  // Check if running in insecure context
+  const isSecure = window.isSecureContext;
+  const protocol = location.protocol;
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    // Not supported — show guidance
+    errTitle.textContent = '❌ Browser tidak mendukung akses kamera';
+    errBody.innerHTML = `
+      <b>Kemungkinan penyebab:</b><br>
+      • File dibuka via <code>file://</code> (bukan server) — browser memblokir kamera<br>
+      • Browser lama yang tidak mendukung WebRTC<br>
+      • Protokol: <code>${protocol}</code> — diperlukan <code>https://</code> atau <code>localhost</code>
+    `;
+    errBox.style.display = 'block';
+    howtoBox.style.display = 'block';
+    howtoList.innerHTML = `
+      <li>Gunakan browser <b>Chrome / Edge / Firefox</b> versi terbaru</li>
+      <li>Buka file via <b>localhost</b> (jalankan web server lokal) atau <b>https://</b></li>
+      <li>Cara mudah: install ekstensi <b>Live Server</b> di VS Code, lalu klik "Go Live"</li>
+      <li>Atau upload file ke hosting gratis seperti <b>GitHub Pages / Netlify</b></li>
+    `;
+    btn.textContent = '📷 Coba Lagi';
+    btn.disabled = false;
+    fallbackBtn.style.display = 'block';
+    return;
+  }
+
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+      audio: false
+    });
+
+    // Show test preview
+    camTest.srcObject = mediaStream;
+    camWrap.style.display = 'block';
+
+    btn.textContent = '✅ Kamera Aktif — Mulai Ujian';
+    btn.disabled = false;
+    btn.onclick = () => {
+      document.getElementById('camPreview').srcObject = mediaStream;
+      startExam();
+    };
+
+  } catch(err) {
+    btn.textContent = '📷 Coba Lagi';
+    btn.disabled = false;
+    fallbackBtn.style.display = 'block';
+    errBox.style.display = 'block';
+    howtoBox.style.display = 'block';
+
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      errTitle.textContent = '❌ Izin Kamera Ditolak';
+      errBody.innerHTML = `Browser memblokir akses kamera karena izin ditolak.<br>Kode error: <code>${err.name}</code>`;
+      howtoList.innerHTML = `
+        <li>Klik ikon 🔒 atau 📷 di <b>address bar</b> browser</li>
+        <li>Cari pengaturan <b>"Kamera"</b> dan ubah ke <b>"Izinkan"</b></li>
+        <li>Refresh halaman dan coba lagi</li>
+        <li>Pastikan tidak ada aplikasi lain yang sedang memakai kamera</li>
+      `;
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      errTitle.textContent = '❌ Kamera Tidak Ditemukan';
+      errBody.innerHTML = `Tidak ada perangkat kamera yang terdeteksi.<br>Kode error: <code>${err.name}</code>`;
+      howtoList.innerHTML = `
+        <li>Pastikan kamera laptop/webcam sudah terpasang dan aktif</li>
+        <li>Cek di Device Manager apakah kamera terdeksi</li>
+        <li>Coba restart browser</li>
+      `;
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+      errTitle.textContent = '❌ Kamera Sedang Dipakai Aplikasi Lain';
+      errBody.innerHTML = `Kamera tidak bisa diakses karena sedang digunakan aplikasi lain.<br>Kode error: <code>${err.name}</code>`;
+      howtoList.innerHTML = `
+        <li>Tutup aplikasi video call (Zoom, Teams, Meet, dll)</li>
+        <li>Tutup tab lain yang mungkin memakai kamera</li>
+        <li>Refresh halaman dan coba lagi</li>
+      `;
+    } else if (!isSecure) {
+      errTitle.textContent = '❌ Koneksi Tidak Aman (HTTP)';
+      errBody.innerHTML = `Browser hanya mengizinkan akses kamera via <b>HTTPS</b> atau <b>localhost</b>.<br>
+        Saat ini: <code>${location.href.substring(0,50)}</code>`;
+      howtoList.innerHTML = `
+        <li>Jalankan via <b>localhost</b> menggunakan web server lokal</li>
+        <li>Atau hosting file ke server <b>HTTPS</b></li>
+        <li>VS Code: install <b>Live Server</b> → klik "Go Live" (otomatis HTTPS-like di localhost)</li>
+        <li>Atau gunakan: <b>npx serve .</b> di folder file ini</li>
+      `;
+    } else {
+      errTitle.textContent = `❌ Error: ${err.name}`;
+      errBody.innerHTML = `${err.message || 'Kamera tidak dapat diakses.'}<br>Kode: <code>${err.name}</code>`;
+      howtoList.innerHTML = `
+        <li>Refresh halaman dan coba lagi</li>
+        <li>Coba browser lain (Chrome direkomendasikan)</li>
+        <li>Pastikan driver kamera terinstall</li>
+      `;
+    }
+  }
+}
+
+function startWithoutCamera() {
+  if (confirm("⚠️ Melanjutkan tanpa kamera berarti pemantauan tidak aktif. Pelanggaran tab-switching masih tercatat.\n\nLanjutkan?")) {
+    mediaStream = null;
+    startExam();
+  }
+}
+
+function startExam() {
+  show('examScreen');
+  document.getElementById('headerNIS').textContent = `${currentStudent.nis} — ${currentStudent.name}`;
+
+  // Fullscreen
+  try { document.documentElement.requestFullscreen(); } catch(e){}
+
+  // Attach camera to sidebar preview if available
+  if (mediaStream) {
+    const prev = document.getElementById('camPreview');
+    if (prev) prev.srcObject = mediaStream;
+  } else {
+    // Hide cam preview if no camera
+    const camWrap = document.querySelector('.cam-preview');
+    if (camWrap) {
+      camWrap.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--warn);text-align:center;">📵 Kamera tidak aktif</div>';
+    }
+    const camInd = document.querySelector('.cam-indicator');
+    if (camInd) { camInd.innerHTML = '<span style="color:var(--warn)">⚠ Tanpa Kamera</span>'; }
+  }
+
+  startTimer();
+  buildQGrid();
+  renderQuestion(0);
+  setupSecurityHooks();
+  if (mediaStream) startPhoneDetection();
+}
+
+// ════════════════════════════════════════════════════════════
+//  SECURITY HOOKS
+// ════════════════════════════════════════════════════════════
+function setupSecurityHooks() {
+  // Visibility change (switch tab / minimize)
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  // Window blur
+  window.addEventListener('blur', onWindowBlur);
+  // Fullscreen exit
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  // Right click
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  // Key combos
+  document.addEventListener('keydown', onKeyDown);
+  // Copy / paste
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('cut',  e => e.preventDefault());
+}
+
+function onVisibilityChange() {
+  if (examFinished) return;
+  if (document.hidden) recordViolation('Berpindah tab/aplikasi', true);
+}
+
+function onWindowBlur() {
+  if (examFinished) return;
+  recordViolation('Jendela kehilangan fokus', false);
+}
+
+function onFullscreenChange() {
+  if (examFinished) return;
+  if (!document.fullscreenElement) {
+    recordViolation('Keluar dari mode layar penuh', false);
+    try { document.documentElement.requestFullscreen(); } catch(e){}
+  }
+}
+
+function onKeyDown(e) {
+  if (examFinished) return;
+  const blocked = [
+    e.key === 'Tab',
+    e.altKey && e.key === 'Tab',
+    e.metaKey || (e.ctrlKey && ['c','v','u','s','a','p','w','t','n'].includes(e.key.toLowerCase())),
+    e.key === 'F5', e.key === 'F12',
+    e.altKey && e.key === 'F4',
+    e.key === 'PrintScreen',
+  ];
+  if (blocked.some(Boolean)) {
+    e.preventDefault();
+    recordViolation(`Shortcut terlarang: ${e.ctrlKey?'Ctrl+':''}${e.altKey?'Alt+':''}${e.metaKey?'Meta+':''}${e.key}`, false);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  PHONE DETECTION (via brightness heuristic on canvas)
+// ════════════════════════════════════════════════════════════
+function startPhoneDetection() {
+  const video = document.getElementById('camPreview');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  let lastBright = null;
+  let phoneFrameCount = 0;
+
+  phoneCheckInterval = setInterval(() => {
+    if (examFinished || !mediaStream) return;
+    if (video.videoWidth === 0) return;
+
+    canvas.width  = 64;
+    canvas.height = 48;
+    ctx.drawImage(video, 0, 0, 64, 48);
+    const data = ctx.getImageData(0, 0, 64, 48).data;
+
+    // Calculate average brightness
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 4) sum += (data[i]+data[i+1]+data[i+2]) / 3;
+    const avgBright = sum / (data.length / 4);
+
+    // Count bright pixels (potential phone screen glow)
+    let brightPixels = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const lum = (data[i]+data[i+1]+data[i+2]) / 3;
+      if (lum > 200) brightPixels++;
+    }
+    const brightRatio = brightPixels / (data.length / 4);
+
+    if (lastBright !== null) {
+      const delta = Math.abs(avgBright - lastBright);
+      // Sudden bright spot + delta = likely phone screen
+      if (brightRatio > 0.3 && delta > 25) {
+        phoneFrameCount++;
+        if (phoneFrameCount >= 2) {
+          phoneFrameCount = 0;
+          recordViolation('Terdeteksi kemungkinan penggunaan HP', true);
+          showOverlay('phoneAlert');
+        }
+      } else {
+        phoneFrameCount = Math.max(0, phoneFrameCount - 1);
+      }
+    }
+    lastBright = avgBright;
+  }, 2000);
+}
+
+// ════════════════════════════════════════════════════════════
+//  VIOLATION RECORDER
+// ════════════════════════════════════════════════════════════
+function recordViolation(reason, capture = true) {
+  violations++;
+  document.getElementById('violCount').textContent = violations;
+  document.getElementById('violationBadge').style.display = 'inline-flex';
+
+  if (currentStudent && adminLog[currentStudent.nis]) {
+    adminLog[currentStudent.nis].violations = violations;
+  }
+
+  if (capture) {
+    captureViolationPhoto(reason);
+  }
+
+  if (reason.includes('berpindah') || reason.includes('Berpindah') || reason.includes('fokus')) {
+    showOverlay('focusAlert');
+  }
+
+  showToast(`⚠ ${reason}`, capture ? 'Foto telah diambil & dikirim ke guru' : 'Tindakan dicatat dalam log ujian');
+}
+
+function captureViolationPhoto(reason) {
+  const video = document.getElementById('camPreview');
+  if (!video || video.videoWidth === 0) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, -canvas.width, 0);
+
+  // Timestamp overlay
+  ctx.scale(-1, 1);
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0, canvas.height - 36, canvas.width, 36);
+  ctx.fillStyle = '#ff4444';
+  ctx.font = 'bold 13px monospace';
+  ctx.fillText(`PELANGGARAN: ${reason}`, 8, canvas.height - 20);
+  ctx.fillStyle = '#fff';
+  ctx.font = '11px monospace';
+  ctx.fillText(`${currentStudent?.nis} | ${new Date().toLocaleString('id-ID')}`, 8, canvas.height - 6);
+
+  const dataURL = canvas.toDataURL('image/jpeg', 0.7);
+  violationPhotos.push({ reason, time: new Date().toLocaleString('id-ID'), photo: dataURL });
+
+  if (currentStudent && adminLog[currentStudent.nis]) {
+    adminLog[currentStudent.nis].photos = violationPhotos;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  TIMER
+// ════════════════════════════════════════════════════════════
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timerSecs--;
+    const m = Math.floor(timerSecs / 60).toString().padStart(2,'0');
+    const s = (timerSecs % 60).toString().padStart(2,'0');
+    const el = document.getElementById('timerDisplay');
+    el.textContent = `⏱ ${m}:${s}`;
+    el.className = 'timer-block';
+    if (timerSecs <= 300) el.classList.add('warn');
+    if (timerSecs <= 60)  el.classList.add('danger');
+    if (timerSecs <= 0) {
+      clearInterval(timerInterval);
+      showOverlay('timeupAlert');
+    }
+  }, 1000);
+}
+
+// ════════════════════════════════════════════════════════════
+//  QUESTION RENDER
+// ════════════════════════════════════════════════════════════
+function renderQuestion(idx) {
+  currentQ = idx;
+  updateQGrid();
+  const q = QUESTIONS[idx];
+  const area = document.getElementById('questionArea');
+  area.innerHTML = `
+    <div class="q-meta">
+      <span class="q-number">Soal ${idx+1} dari ${QUESTIONS.length}</span>
+      <span class="q-subject-tag">${q.subject}</span>
+      <button class="q-flag-btn ${flagged[idx]?'active':''}" onclick="toggleFlag(${idx})">
+        ${flagged[idx]?'🚩 Ditandai':'🏳 Tandai'}
+      </button>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">
+      ${q.opts.map((opt, i) => `
+        <div class="option ${answers[idx]===i?'selected':''}" onclick="selectAnswer(${idx},${i})">
+          <div class="opt-letter">${'ABCD'[i]}</div>
+          <div class="opt-text">${opt}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="nav-btns">
+      ${idx > 0 ? `<button class="btn-nav" onclick="renderQuestion(${idx-1})">← Sebelumnya</button>` : ''}
+      ${idx < QUESTIONS.length-1
+        ? `<button class="btn-nav next" onclick="renderQuestion(${idx+1})">Selanjutnya →</button>`
+        : `<button class="btn-nav btn-submit" onclick="confirmSubmit()">📤 Kumpulkan</button>`
+      }
+    </div>
+  `;
+  updateProgress();
+}
+
+function selectAnswer(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+  renderQuestion(qIdx);
+}
+
+function toggleFlag(idx) {
+  flagged[idx] = !flagged[idx];
+  renderQuestion(idx);
+}
+
+// ════════════════════════════════════════════════════════════
+//  Q GRID
+// ════════════════════════════════════════════════════════════
+function buildQGrid() {
+  const grid = document.getElementById('qGrid');
+  grid.innerHTML = QUESTIONS.map((_, i) =>
+    `<button class="q-btn" id="qb${i}" onclick="renderQuestion(${i})">${i+1}</button>`
+  ).join('');
+  updateQGrid();
+}
+
+function updateQGrid() {
+  QUESTIONS.forEach((_, i) => {
+    const btn = document.getElementById(`qb${i}`);
+    if (!btn) return;
+    btn.className = 'q-btn';
+    if (answers[i] !== null) btn.classList.add('answered');
+    if (flagged[i]) btn.classList.add('flagged');
+    if (i === currentQ) btn.classList.add('current');
+  });
+}
+
+function updateProgress() {
+  const done = answers.filter(a => a !== null).length;
+  const pct  = (done / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} / ${QUESTIONS.length} terjawab`;
+}
+
+// ════════════════════════════════════════════════════════════
+//  SUBMIT
+// ════════════════════════════════════════════════════════════
+function confirmSubmit() {
+  const unanswered = answers.filter(a => a === null).length;
+  document.getElementById('submitAlertBody').textContent =
+    unanswered > 0
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengumpulkan?`
+      : `Semua ${QUESTIONS.length} soal telah dijawab. Kumpulkan sekarang?`;
+  showOverlay('submitAlert');
+}
+
+function finalSubmit() {
+  examFinished = true;
+  clearInterval(timerInterval);
+  clearInterval(phoneCheckInterval);
+
+  // Cleanup events
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('blur', onWindowBlur);
+
+  // Stop camera
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+
+  // Exit fullscreen
+  try { document.exitFullscreen(); } catch(e){}
+
+  // Calculate score
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => { if (answers[i] === q.ans) correct++; });
+  const wrong = answers.filter((a,i) => a !== null && a !== QUESTIONS[i].ans).length;
+  const skip  = answers.filter(a => a === null).length;
+  const score = Math.round((correct / QUESTIONS.length) * 100);
+
+  // Update admin log
+  if (currentStudent && adminLog[currentStudent.nis]) {
+    adminLog[currentStudent.nis].score = score;
+    adminLog[currentStudent.nis].done  = true;
+  }
+
+  // Show result
+  dismissAlert('submitAlert');
+  dismissAlert('timeupAlert');
+
+  const pct = score + '%';
+  document.getElementById('scoreRing').style.setProperty('--pct', pct);
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('resultName').textContent = currentStudent.name;
+  document.getElementById('resultNIS').textContent  = `NIS: ${currentStudent.nis} | Kelas: ${currentStudent.class}`;
+  document.getElementById('rCorrect').textContent = correct;
+  document.getElementById('rWrong').textContent   = wrong;
+  document.getElementById('rSkip').textContent    = skip;
+  document.getElementById('rViolInfo').textContent =
+    violations > 0 ? `⚠ Tercatat ${violations} pelanggaran selama ujian` : '✅ Tidak ada pelanggaran';
+
+  show('resultScreen');
+}
+
+// ════════════════════════════════════════════════════════════
+//  ADMIN PANEL
+// ════════════════════════════════════════════════════════════
+function renderAdminPanel() {
+  const grid = document.getElementById('adminGrid');
+  const allStudents = Object.entries(STUDENTS);
+
+  document.getElementById('statTotal').textContent = allStudents.length;
+  const doneList  = Object.values(adminLog).filter(s => s.done);
+  const violList  = Object.values(adminLog).filter(s => s.violations > 0);
+  document.getElementById('statDone').textContent = doneList.length;
+  document.getElementById('statViol').textContent = violList.length;
+  const scores = doneList.map(s => s.score).filter(s => s !== null);
+  document.getElementById('statAvg').textContent = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '—';
+
+  grid.innerHTML = allStudents.map(([nis, data]) => {
+    const log = adminLog[nis];
+    const hasViol = log && log.violations > 0;
+    const isDone  = log && log.done;
+    const photos  = log ? log.photos : [];
+
+    return `
+      <div class="student-card">
+        <div class="nis">${nis}</div>
+        <div class="name">${data.name}</div>
+        <div class="status">Kelas: ${data.class}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          ${isDone
+            ? `<span class="ok-tag">✅ Selesai — Nilai: ${log.score}</span>`
+            : `<span style="background:rgba(59,106,255,.1);border:1px solid rgba(59,106,255,.3);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--accent);">Belum Selesai</span>`
+          }
+          ${hasViol ? `<span class="violation-tag">⚠ ${log.violations} Pelanggaran</span>` : ''}
+        </div>
+        ${photos.length > 0 ? `
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Foto Pelanggaran:</div>
+            <div class="photos-wrap">
+              ${photos.map((p,i) => `
+                <img class="violation-photo" src="${p.photo}" alt="Pelanggaran ${i+1}"
+                     title="${p.reason} — ${p.time}"
+                     onclick="viewPhoto('${p.photo}')" />
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function viewPhoto(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').style.display = 'flex';
+}
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function show(id) {
+  ['loginScreen','permScreen','examScreen','resultScreen','adminScreen'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  target.style.display = target.tagName === 'DIV' && id !== 'adminScreen' ? 'flex' : 'block';
+  if (id === 'adminScreen') target.style.display = 'block';
+}
+
+function showOverlay(id) {
+  document.getElementById(id).style.display = 'flex';
+}
+
+function dismissAlert(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+let toastTimeout;
+function showToast(title, body) {
+  const toast = document.getElementById('violationToast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastBody').textContent  = body;
+  toast.style.display = 'block';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 5000);
+}
+
+function logoutToLogin() {
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  clearInterval(timerInterval);
+  clearInterval(phoneCheckInterval);
+  try { document.exitFullscreen(); } catch(e){}
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('blur', onWindowBlur);
+  currentStudent = null;
+  document.getElementById('inputNIS').value = '';
+  document.getElementById('inputPW').value  = '';
+  document.getElementById('loginError').style.display = 'none';
+  show('loginScreen');
+}
+
+// Init
+show('loginScreen');
+</script>
+</body>
+</html>
